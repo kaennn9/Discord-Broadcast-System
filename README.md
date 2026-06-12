@@ -7,14 +7,14 @@
 </p>
 
 <p align="center">
-  <a href="https://discord.com/users/1188494987520909422">
+  <a href="https://discord.com/users/640239524361797699">
     <img src="https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white" alt="Discord"/>
   </a>
-  <a href="https://github.com/YOUR_USERNAME/discord-broadcast-system">
+  <a href="https://github.com/kaennn9/discord-broadcast-system">
     <img src="https://img.shields.io/badge/GitHub-171515?style=for-the-badge&logo=github&logoColor=white" alt="GitHub"/>
   </a>
-  <a href="https://github.com/YOUR_USERNAME/discord-broadcast-system/stargazers">
-    <img src="https://img.shields.io/github/stars/YOUR_USERNAME/discord-broadcast-system?style=for-the-badge&color=FFD700&labelColor=1A1A1A" alt="Stars"/>
+  <a href="https://github.com/kaennn9/discord-broadcast-system/stargazers">
+    <img src="https://img.shields.io/github/stars/kaennn9/discord-broadcast-system?style=for-the-badge&color=FFD700&labelColor=1A1A1A" alt="Stars"/>
   </a>
 </p>
 
@@ -130,7 +130,7 @@ graph TD
 ## 🚀 التثبيت والتشغيل
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/discord-broadcast-system.git
+git clone https://github.com/kaennn9/discord-broadcast-system.git
 cd discord-broadcast-system
 
 npm install
@@ -169,7 +169,7 @@ npm start
 ---
 
 <p align="center">
-  <a href="https://github.com/YOUR_USERNAME/discord-broadcast-system">
+  <a href="https://github.com/kaennn9/discord-broadcast-system">
     <img src="https://img.icons8.com/ios-filled/50/FFD700/star.png" alt="Star"/>
     <strong>إذا أعجبك المشروع، لا تنسَ تعطيه ⭐</strong>
     <img src="https://img.icons8.com/ios-filled/50/FFD700/star.png" alt="Star"/>
@@ -181,6 +181,6 @@ npm start
   <img src="https://img.icons8.com/fluency/48/sparkling.png" alt="sparkles"/>
 </p>
 
-**License**: MIT © [YOUR NAME](https://github.com/YOUR_USERNAME)
+**License**: MIT © [YOUR NAME](https://github.com/kaennn9)
 
 ---
