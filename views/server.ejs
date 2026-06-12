@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= stats.name %> - Control Panel</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.1.0/uicons-regular-rounded/css/uicons-regular-rounded.css'>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <% if (stats.icon) { %>
+        <div class="server-bg-overlay" style="background-image: url('<%= stats.icon %>')"></div>
+    <% } %>
+    <div class="app-container">
+        <!-- Sidebar Icons -->
+        <div class="guild-list">
+            <% if (typeof isGuest === 'undefined' || !isGuest) { %>
+                <a href="/" class="guild-icon" title="Dashboard"><i class="fi fi-rr-home"></i></a>
+                <div style="width: 32px; height: 2px; background: rgba(255,255,255,0.2); margin: 4px 0;"></div>
+            <% } %>
+            <% if (stats.icon) { %>
+                <img src="<%= stats.icon %>" class="guild-icon" style="object-fit: cover;">
+            <% } else { %>
+                <div class="guild-icon"><%= stats.name.substring(0, 2) %></div>
+            <% } %>
+        </div>
+
+        <div class="main-content">
+            <div class="topbar" style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; align-items: center;">
+                    <% if (stats.icon) { %>
+                        <img src="<%= stats.icon %>" style="width: 28px; height: 28px; border-radius: 50%; margin-right: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+                    <% } else { %>
+                        <div style="width: 28px; height: 28px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; margin-right: 12px; font-size: 12px;">
+                            <%= stats.name.substring(0, 1) %>
+                        </div>
+                    <% } %>
+                    <%= stats.name %> Control Panel
+                </div>
+                <% if (typeof isGuest === 'undefined' || !isGuest) { %>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn" style="padding: 6px 12px; font-size: 13px; background: var(--bg-icons);" onclick="document.getElementById('inviteModal').style.display='flex'">
+                            <i class="fi fi-rr-share"></i> Share Access
+                        </button>
+                        <a href="/logout" class="btn btn-danger" style="padding: 6px 12px; font-size: 13px; text-decoration: none; background: #8a2a2a;"><i class="fi fi-rr-sign-out-alt"></i> Logout</a>
+                    </div>
+                <% } %>
+            </div>
+            <div class="content-body">
+                
+                <div class="card" style="margin-bottom: 24px; padding: 20px;">
+                    <canvas id="statsChart" style="max-height: 250px; width: 100%;"></canvas>
+                </div>
+                
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const ctx = document.getElementById('statsChart').getContext('2d');
+                        
+                        const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+                        gradient.addColorStop(0, 'rgba(88, 101, 242, 0.8)');
+                        gradient.addColorStop(1, 'rgba(88, 101, 242, 0.1)');
+
+                        const dangerGradient = ctx.createLinearGradient(0, 0, 0, 400);
+                        dangerGradient.addColorStop(0, 'rgba(237, 66, 69, 0.8)');
+                        dangerGradient.addColorStop(1, 'rgba(237, 66, 69, 0.1)');
+
+                        const successGradient = ctx.createLinearGradient(0, 0, 0, 400);
+                        successGradient.addColorStop(0, 'rgba(87, 242, 135, 0.8)');
+                        successGradient.addColorStop(1, 'rgba(87, 242, 135, 0.1)');
+
+                        new Chart(ctx, {
+                            type: 'bar',
+                            data: {
+                                labels: ['Members', 'Online', 'Offline', 'Bots', 'Channels', 'Blacklisted', 'Helpers'],
+                                datasets: [{
+                                    label: 'Server Statistics',
+                                    data: [
+                                        <%= stats.memberCount %>, 
+                                        <%= stats.online %>, 
+                                        <%= stats.offline %>, 
+                                        <%= stats.bots %>, 
+                                        <%= stats.channels %>, 
+                                        <%= blacklist.length %>, 
+                                        <%= guildHelpers.length %>
+                                    ],
+                                    backgroundColor: [
+                                        gradient, successGradient, gradient, gradient, gradient, dangerGradient, dangerGradient
+                                    ],
+                                    borderColor: [
+                                        'rgba(88, 101, 242, 1)', 'rgba(87, 242, 135, 1)', 'rgba(88, 101, 242, 1)', 'rgba(88, 101, 242, 1)', 'rgba(88, 101, 242, 1)', 'rgba(237, 66, 69, 1)', 'rgba(237, 66, 69, 1)'
+                                    ],
+                                    borderWidth: 1,
+                                    borderRadius: 8,
+                                    barPercentage: 0.5
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: { display: false },
+                                    tooltip: {
+                                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                        titleFont: { size: 13, family: "sans-serif" },
+                                        bodyFont: { size: 14, weight: 'bold', family: "sans-serif" },
+                                        padding: 12,
+                                        cornerRadius: 8,
+                                        displayColors: false
+                                    }
+                                },
+                                scales: {
+                                    y: {
+                                        beginAtZero: true,
+                                        grid: {
+                                            color: 'rgba(255, 255, 255, 0.05)',
+                                            drawBorder: false
+                                        },
+                                        ticks: { color: 'rgba(255, 255, 255, 0.6)', font: { family: "sans-serif" } }
+                                    },
+                                    x: {
+                                        grid: { display: false },
+                                        ticks: { color: 'rgba(255, 255, 255, 0.6)', font: { family: "sans-serif" } }
+                                    }
+                                }
+                            }
+                        });
+                    });
+                </script>
+
+                <div style="display: flex; gap: 24px; margin-top: 24px;">
+                    <div class="card" style="flex: 1;">
+                        <h2><i class="fi fi-rr-megaphone"></i> Broadcast Message</h2>
+                        <form id="broadcastForm">
+                            <input type="hidden" name="id" value="<%= id %>">
+                            <input type="hidden" name="guildId" value="<%= guildId %>">
+                            
+                            <div class="form-group">
+                                <label>Message Content</label>
+                                <textarea name="message" rows="5" required placeholder="Write your message..."></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Target Type</label>
+                                <select name="type">
+                                    <option value="all">All Members</option>
+                                    <option value="online">Online Members</option>
+                                    <option value="offline">Offline Members</option>
+                                    <option value="idle">Idle Members</option>
+                                    <option value="dnd">DND Members</option>
+                                    <option value="humans">Humans Only</option>
+                                    <option value="bots">Bots Only</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Sending Mode (نظام الإرسال)</label>
+                                <select name="distMode">
+                                    <option value="smart">Smart System (النظام الذكي)</option>
+                                    <option value="random">Random System (النظام العشوائي)</option>
+                                    <option value="both">Both Systems (النظامين معاً - عشوائي وذكي)</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group" style="display: flex; align-items: center; gap: 8px; margin-bottom: 15px;">
+                                <input type="checkbox" name="includeMain" id="includeMain" value="true" style="width: auto; margin: 0;">
+                                <label for="includeMain" style="margin: 0; cursor: pointer; font-size: 13px;">Include Main Bot in Sending (إشراك البوت الأساسي في الإرسال)</label>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Delay (ms)</label>
+                                <input type="number" name="delay" value="1000" min="0">
+                            </div>
+
+                            <div style="display: flex; gap: 10px;">
+                                <button type="submit" class="btn" id="startBtn"><i class="fi fi-rr-play"></i> Start Broadcast</button>
+                                <button type="button" class="btn btn-danger" id="stopBtn" style="display: none;"><i class="fi fi-rr-stop"></i> Stop Broadcast</button>
+                            </div>
+                        </form>
+
+                        <div id="progressSection" style="display: none; margin-top: 24px;">
+                            <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 8px; font-weight: bold;">
+                                <span>Progress: <span id="progress-text">0/0</span></span>
+                                <span>Success: <span id="success-count" style="color: var(--success);">0</span> | Failed: <span id="failed-count" style="color: var(--danger);">0</span></span>
+                            </div>
+                            <div class="progress-container">
+                                <div class="progress-bar" id="bar"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card" style="flex: 1; display: flex; flex-direction: column; position: relative; overflow: hidden; border: 1px solid rgba(255,255,255,0.05);">
+                        <div style="position: absolute; top: -50px; right: -50px; width: 150px; height: 150px; background: radial-gradient(circle, var(--accent) 0%, transparent 70%); opacity: 0.15; filter: blur(30px); pointer-events: none;"></div>
+                        
+                        <h2 style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                            <span style="display: flex; align-items: center; gap: 8px;"><i class="fi fi-rr-user-add" style="color: var(--accent);"></i> Helper Bots</span>
+                            <span style="font-size: 11px; background: rgba(88, 101, 242, 0.2); color: var(--accent); padding: 4px 10px; border-radius: 12px; font-weight: bold; border: 1px solid rgba(88, 101, 242, 0.3);"><%= guildHelpers.length %> Active</span>
+                        </h2>
+                        <p style="font-size: 13px; color: #a1a1aa; margin-bottom: 20px;">Helpers assist the main bot in broadcasting to distribute load and increase speed.</p>
+                        
+                        <form id="addHelperForm" action="/guild/helper/add" method="POST" style="margin-bottom: 24px; background: rgba(0,0,0,0.2); padding: 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.03);">
+                            <input type="hidden" name="guildId" value="<%= guildId %>">
+                            <input type="hidden" name="id" value="<%= id %>">
+                            <div class="form-group" style="margin-bottom: 12px;">
+                                <label style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: #6b7280;">Helper Bot Token</label>
+                                <div style="position: relative; display: flex; align-items: center; margin-top: 4px;">
+                                    <i class="fi fi-rr-key" style="position: absolute; left: 12px; color: #6b7280; font-size: 14px;"></i>
+                                    <input type="text" id="helperTokenInput" name="token" required placeholder="Paste helper bot token here..." style="padding-left: 36px; padding-top: 10px; padding-bottom: 10px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; width: 100%; font-size: 13px; transition: border-color 0.3s ease;">
+                                </div>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                                <button type="submit" class="btn" style="justify-content: center; padding: 10px;"><i class="fi fi-rr-plus"></i> Add Helper</button>
+                                <button type="button" class="btn" style="background-color: rgba(255,255,255,0.05); justify-content: center; padding: 10px; border: 1px solid rgba(255,255,255,0.1);" onclick="document.getElementById('reviewModal').style.display='flex'"><i class="fi fi-rr-eye"></i> Review</button>
+                                <button type="button" class="btn" style="background-color: rgba(87, 242, 135, 0.1); border: 1px solid rgba(87, 242, 135, 0.3); color: #57f287; justify-content: center; padding: 10px;" onclick="document.getElementById('restartHelpersForm').submit()"><i class="fi fi-rr-refresh"></i> Restart Helpers</button>
+                                <button type="button" class="btn" style="background-color: rgba(88, 101, 242, 0.1); border: 1px solid rgba(88, 101, 242, 0.3); color: var(--accent); justify-content: center; padding: 10px;" onclick="document.getElementById('helperSettingsModal').style.display='flex'"><i class="fi fi-rr-settings-sliders"></i> Helper Settings</button>
+                            </div>
+                        </form>
+                        <form id="restartHelpersForm" action="/guild/helpers/restart" method="POST" style="display: none;">
+                            <input type="hidden" name="guildId" value="<%= guildId %>">
+                            <input type="hidden" name="id" value="<%= id %>">
+                        </form>
+
+                        <div style="flex: 1; display: flex; flex-direction: column;" id="helpersListWrapper">
+                            <% if (guildHelpers.length === 0) { %>
+                                <div id="noHelpersText" style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0.5; padding: 20px 0;">
+                                    <i class="fi fi-rr-robot" style="font-size: 32px; margin-bottom: 10px; color: var(--accent);"></i>
+                                    <p style="font-size: 13px; font-style: italic;">No helper bots added yet.</p>
+                                </div>
+                            <% } %>
+                            <div id="helpersListContainer" style="display: <%= guildHelpers.length === 0 ? 'none' : 'flex' %>; flex-direction: column; gap: 10px; overflow-y: auto; max-height: 190px; padding-right: 5px;" class="custom-scrollbar">
+                                <% guildHelpers.forEach(helper => { %>
+                                    <div style="background: linear-gradient(145deg, rgba(255,255,255,0.02) 0%, rgba(0,0,0,0.2) 100%); padding: 12px 16px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255,255,255,0.03); transition: transform 0.2s ease;">
+                                        <div style="display: flex; align-items: center; gap: 12px;">
+                                            <div style="width: 36px; height: 36px; border-radius: 50%; background: rgba(88, 101, 242, 0.1); display: flex; align-items: center; justify-content: center; border: 1px solid rgba(88, 101, 242, 0.2);">
+                                                <i class="fi fi-rr-robot" style="font-size: 16px; color: var(--accent);"></i>
+                                            </div>
+                                            <div>
+                                                <div style="font-weight: bold; color: white; font-size: 14px;"><%= helper.botName %></div>
+                                                <div style="font-size: 11px; color: #a1a1aa; font-family: monospace;">ID: <%= helper.id %></div>
+                                            </div>
+                                        </div>
+                                        <form action="/guild/helper/remove" method="POST" onsubmit="return confirm('Are you sure you want to remove this helper bot?')">
+                                            <input type="hidden" name="guildId" value="<%= guildId %>">
+                                            <input type="hidden" name="id" value="<%= id %>">
+                                            <input type="hidden" name="helperId" value="<%= helper.id %>">
+                                            <button type="submit" class="btn btn-danger" style="padding: 6px 10px; font-size: 12px; background: rgba(237, 66, 69, 0.1); border: 1px solid rgba(237, 66, 69, 0.3); color: #ed4245;" onmouseover="this.style.background='#ed4245'; this.style.color='white'" onmouseout="this.style.background='rgba(237, 66, 69, 0.1)'; this.style.color='#ed4245'"><i class="fi fi-rr-trash"></i> Remove</button>
+                                        </form>
+                                    </div>
+                                <% }) %>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 24px; margin-top: 24px;">
+                    <div class="card" style="flex: 1; padding: 0; overflow: hidden; display: flex; flex-direction: column; border: 1px solid rgba(255, 255, 255, 0.05);">
+                        <div style="background: rgba(0, 0, 0, 0.4); padding: 12px 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); display: flex; align-items: center; justify-content: space-between;">
+                            <h2 style="margin: 0; font-size: 15px; display: flex; align-items: center; gap: 8px; color: #e0e0e0;">
+                                <i class="fi fi-rr-terminal" style="color: var(--accent);"></i> System Terminal
+                            </h2>
+                            <div style="display: flex; gap: 6px;">
+                                <div style="width: 12px; height: 12px; border-radius: 50%; background: #ed4245; box-shadow: 0 0 5px #ed424580;"></div>
+                                <div style="width: 12px; height: 12px; border-radius: 50%; background: #fee75c; box-shadow: 0 0 5px #fee75c80;"></div>
+                                <div style="width: 12px; height: 12px; border-radius: 50%; background: #57f287; box-shadow: 0 0 5px #57f28780;"></div>
+                            </div>
+                        </div>
+                        <div id="log-panel" style="height: 300px; overflow-y: auto; background: #0a0a0f; padding: 16px; font-family: 'Consolas', 'Courier New', monospace; font-size: 13px; line-height: 1.6; letter-spacing: 0.5px; box-shadow: inset 0 0 20px rgba(0,0,0,0.5);">
+                            <div style="color: #6b7280; margin-bottom: 8px;">> Connection established...</div>
+                            <div style="color: #6b7280; margin-bottom: 15px;">> Awaiting broadcast commands...</div>
+                        </div>
+                    </div>
+
+                    <div class="card" style="flex: 1; display: flex; flex-direction: column; position: relative; overflow: hidden; border: 1px solid rgba(255,255,255,0.05);">
+                        <div style="position: absolute; top: -50px; right: -50px; width: 150px; height: 150px; background: radial-gradient(circle, #ed4245 0%, transparent 70%); opacity: 0.15; filter: blur(30px); pointer-events: none;"></div>
+                        
+                        <h2 style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                            <span style="display: flex; align-items: center; gap: 8px;"><i class="fi fi-rr-ban" style="color: #ed4245;"></i> Blacklist</span>
+                            <span style="font-size: 11px; background: rgba(237, 66, 69, 0.1); color: #ed4245; padding: 4px 10px; border-radius: 12px; font-weight: bold; border: 1px solid rgba(237, 66, 69, 0.2);"><span id="blacklist-count"><%= blacklist.length %></span> Blocked</span>
+                        </h2>
+                        <p style="font-size: 13px; color: #a1a1aa; margin-bottom: 20px;">Search and manage users who are excluded from receiving broadcasts.</p>
+                        
+                        <div style="position: relative; margin-bottom: 16px;">
+                            <i class="fi fi-rr-search" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #6b7280; font-size: 14px;"></i>
+                            <input type="text" id="blacklistSearch" placeholder="Search by ID or Username..." style="width: 100%; padding: 12px 12px 12px 38px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.3); color: white; transition: border-color 0.3s ease; font-size: 13px;">
+                        </div>
+                        
+                        <div id="memberListContainer" style="flex: 1; overflow-y: auto; height: 230px; display: flex; flex-direction: column; gap: 10px; padding-right: 5px;" class="custom-scrollbar">
+                            <!-- Members populated via JS -->
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Review Helpers Modal -->
+    <div id="reviewModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; justify-content:center; align-items:center;">
+        <div class="card" style="width: 700px; max-height: 85vh; overflow-y: auto; background: var(--bg-card); position:relative; box-shadow: 0 10px 40px rgba(0,0,0,0.5);">
+            <button type="button" onclick="document.getElementById('reviewModal').style.display='none'" style="position:absolute; right:20px; top:20px; background:transparent; border:none; color:white; cursor:pointer; font-size:20px;"><i class="fi fi-rr-cross"></i></button>
+            <h2><i class="fi fi-rr-users-alt"></i> Helpers Review</h2>
+            
+            <form action="/guild/helper/webhook" method="POST" style="margin-bottom:24px; background:rgba(0,0,0,0.2); padding:15px; border-radius:8px; border:1px solid rgba(255,255,255,0.05);">
+                <input type="hidden" name="guildId" value="<%= guildId %>">
+                <input type="hidden" name="id" value="<%= id %>">
+                <label>Set Logger Webhook (For Failures & Events)</label>
+                <div style="display:flex; gap:10px;">
+                    <input type="text" name="webhookUrl" value="<%= webhookUrl || '' %>" placeholder="https://discord.com/api/webhooks/..." style="flex:1;">
+                    <button type="submit" class="btn"><i class="fi fi-rr-link"></i> Save</button>
+                    <button type="button" class="btn" style="background: var(--accent);" onclick="document.getElementById('inviteBotsModal').style.display='flex'">
+                        <i class="fi fi-rr-add"></i> Invite Bots
+                    </button>
+                </div>
+            </form>
+
+            <table style="width: 100%; text-align: left; border-collapse: collapse;">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Bot Name</th>
+                        <th>ID</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (guildHelpers.length === 0) { %>
+                        <tr>
+                            <td colspan="5" style="text-align:center; padding: 20px; color: var(--text-muted);">No helpers available.</td>
+                        </tr>
+                    <% } else { %>
+                        <% guildHelpers.forEach(helper => { %>
+                            <tr>
+                                <td style="font-weight:bold; color:var(--text-muted);"><%= helper.index %></td>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <img src="<%= helper.avatar %>" style="width: 36px; height: 36px; border-radius: 50%; border: 2px solid var(--accent);">
+                                        <span style="font-weight:bold; font-size: 14px;"><%= helper.botName %></span>
+                                    </div>
+                                </td>
+                                <td style="font-size: 12px; color: var(--text-muted); font-family: monospace;"><%= helper.id %></td>
+                                <td>
+                                    <span style="color: <%= helper.status === 'online' ? 'var(--success)' : 'var(--danger)' %>; font-weight:bold; display:flex; align-items:center; gap:5px;">
+                                        <i class="fi fi-rr-circle-small" style="font-size:18px;"></i> <%= helper.status.toUpperCase() %>
+                                    </span>
+                                </td>
+                                <td>
+                                    <form action="/guild/helper/remove" method="POST" onsubmit="return confirm('Are you sure you want to remove this helper bot?')">
+                                        <input type="hidden" name="guildId" value="<%= guildId %>">
+                                        <input type="hidden" name="id" value="<%= id %>">
+                                        <input type="hidden" name="helperId" value="<%= helper.id %>">
+                                        <button type="submit" class="btn btn-danger" style="padding: 6px 10px; font-size: 12px; background: rgba(237, 66, 69, 0.1); border: 1px solid rgba(237, 66, 69, 0.3); color: #ed4245; display: inline-flex; align-items: center; gap: 4px;" onmouseover="this.style.background='#ed4245'; this.style.color='white'" onmouseout="this.style.background='rgba(237, 66, 69, 0.1)'; this.style.color='#ed4245'"><i class="fi fi-rr-trash"></i> Remove</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Invite Bots Modal -->
+    <div id="inviteBotsModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; justify-content:center; align-items:center;">
+        <div class="card" style="width: 500px; max-height: 85vh; overflow-y: auto; background: var(--bg-card); position:relative; box-shadow: 0 10px 40px rgba(0,0,0,0.5);">
+            <button type="button" onclick="document.getElementById('inviteBotsModal').style.display='none'" style="position:absolute; right:20px; top:20px; background:transparent; border:none; color:white; cursor:pointer; font-size:20px;"><i class="fi fi-rr-cross"></i></button>
+            <h2><i class="fi fi-rr-user-add"></i> Invite Bots to Server</h2>
+            <p style="font-size: 13px; color: #e0e0e0; margin-bottom: 20px;">Invite the main bot and helper bots to your server to start broadcasting.</p>
+            
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                <!-- Main Bot Invite -->
+                <div style="background: linear-gradient(145deg, rgba(255,255,255,0.02) 0%, rgba(0,0,0,0.2) 100%); padding: 12px 16px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(88, 101, 242, 0.2);">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div style="width: 36px; height: 36px; border-radius: 50%; background: rgba(88, 101, 242, 0.1); display: flex; align-items: center; justify-content: center; border: 1px solid rgba(88, 101, 242, 0.2);">
+                            <i class="fi fi-rr-crown" style="font-size: 16px; color: var(--accent);"></i>
+                        </div>
+                        <div>
+                            <div style="font-weight: bold; color: white; font-size: 14px;"><%= stats.name %> (Main Bot)</div>
+                            <div style="font-size: 11px; color: #a1a1aa; font-family: monospace;">Role: Main</div>
+                        </div>
+                    </div>
+                    <% if (typeof mainBotId !== 'undefined' && mainBotId) { %>
+                        <a href="https://discord.com/api/oauth2/authorize?client_id=<%= mainBotId %>&permissions=8&scope=bot&guild_id=<%= guildId %>" target="_blank" class="btn" style="padding: 6px 12px; font-size: 13px; background: var(--accent); text-decoration: none; display: inline-flex; align-items: center; gap: 5px;">
+                            <i class="fi fi-rr-link"></i> Invite
+                        </a>
+                    <% } else { %>
+                        <span style="font-size: 12px; color: var(--danger);">ID Not Found</span>
+                    <% } %>
+                </div>
+
+                <!-- Helper Bots Invites -->
+                <h3 style="font-size: 14px; margin: 10px 0 5px 0; color: var(--text-muted);">Helper Bots</h3>
+                <% if (guildHelpers.length === 0) { %>
+                    <p style="font-size: 13px; font-style: italic; color: var(--text-muted); text-align: center;">No helper bots added yet.</p>
+                <% } else { %>
+                    <% guildHelpers.forEach(helper => { %>
+                        <div style="background: linear-gradient(145deg, rgba(255,255,255,0.02) 0%, rgba(0,0,0,0.2) 100%); padding: 12px 16px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255,255,255,0.03);">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <img src="<%= helper.avatar %>" style="width: 36px; height: 36px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.1);">
+                                <div>
+                                    <div style="font-weight: bold; color: white; font-size: 14px;"><%= helper.botName %></div>
+                                    <div style="font-size: 11px; color: #a1a1aa; font-family: monospace;">ID: <%= helper.botId %></div>
+                                </div>
+                            </div>
+                            <% if (helper.botId) { %>
+                                <a href="https://discord.com/api/oauth2/authorize?client_id=<%= helper.botId %>&permissions=8&scope=bot&guild_id=<%= guildId %>" target="_blank" class="btn" style="padding: 6px 12px; font-size: 13px; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);" onmouseover="this.style.background='var(--accent)'" onmouseout="this.style.background='rgba(255,255,255,0.05)'">
+                                    <i class="fi fi-rr-link"></i> Invite
+                                </a>
+                            <% } else { %>
+                                <span style="font-size: 12px; color: var(--danger);">Invalid Token</span>
+                            <% } %>
+                        </div>
+                    <% }) %>
+                <% } %>
+            </div>
+        </div>
+    </div>
+
+    <!-- Helper Settings Modal -->
+    <div id="helperSettingsModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; justify-content:center; align-items:center;">
+        <div class="card" style="width: 700px; max-height: 85vh; overflow-y: auto; background: var(--bg-card); position:relative; box-shadow: 0 10px 40px rgba(0,0,0,0.5);">
+            <button type="button" onclick="document.getElementById('helperSettingsModal').style.display='none'" style="position:absolute; right:20px; top:20px; background:transparent; border:none; color:white; cursor:pointer; font-size:20px;"><i class="fi fi-rr-cross"></i></button>
+            <h2><i class="fi fi-rr-settings-sliders"></i> Helper Bots Dashboard</h2>
+            <p style="font-size: 13px; color: #e0e0e0; margin-bottom: 20px;">Manage presence status, names, and avatars for your helper bots.</p>
+
+            <% if (guildHelpers.length === 0) { %>
+                <div style="text-align: center; padding: 40px 0;">
+                    <i class="fi fi-rr-robot" style="font-size: 48px; color: var(--accent); opacity: 0.5; margin-bottom: 10px;"></i>
+                    <p style="font-size: 14px; font-style: italic; color: var(--text-muted);">No helper bots available. Add a helper bot first.</p>
+                </div>
+            <% } else { %>
+                <div style="display: flex; flex-direction: column; gap: 20px;">
+                    <% guildHelpers.forEach(helper => { %>
+                        <div style="background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.05); padding: 20px; border-radius: 12px; display: flex; flex-direction: column; gap: 15px;">
+                            <!-- Header / Info -->
+                            <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 12px;">
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <div style="position: relative;">
+                                        <img src="<%= helper.avatar %>" style="width: 44px; height: 44px; border-radius: 50%; border: 2px solid var(--accent);">
+                                        <div style="position: absolute; bottom: 0; right: 0; background: <%= helper.status === 'online' ? 'var(--success)' : 'var(--danger)' %>; width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--bg-card);"></div>
+                                    </div>
+                                    <div>
+                                        <div style="font-weight: bold; color: white; font-size: 15px;"><%= helper.botName %></div>
+                                        <div style="font-size: 11px; color: var(--text-muted); font-family: monospace;">ID: <%= helper.id %></div>
+                                    </div>
+                                </div>
+                                <span style="font-size: 11px; background: <%= helper.status === 'online' ? 'rgba(87, 242, 135, 0.1)' : 'rgba(237, 66, 69, 0.1)' %>; color: <%= helper.status === 'online' ? '#57f287' : '#ed4245' %>; padding: 4px 8px; border-radius: 8px; font-weight: bold;">
+                                    <%= helper.status.toUpperCase() %>
+                                </span>
+                            </div>
+
+                            <!-- Controls Grid -->
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                                <!-- Identity Form -->
+                                <form action="/guild/helper/settings/identity" method="POST" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 10px; border-right: 1px solid rgba(255,255,255,0.05); padding-right: 15px;">
+                                    <input type="hidden" name="guildId" value="<%= guildId %>">
+                                    <input type="hidden" name="id" value="<%= id %>">
+                                    <input type="hidden" name="helperId" value="<%= helper.id %>">
+                                    
+                                    <div class="form-group" style="margin-bottom: 8px;">
+                                        <label style="font-size: 11px;">Bot Name</label>
+                                        <input type="text" name="username" value="<%= helper.botName %>" style="padding: 8px; font-size: 12px; width: 100%;">
+                                    </div>
+                                    <div class="form-group" style="margin-bottom: 8px;">
+                                        <label style="font-size: 11px;">Change Avatar</label>
+                                        <input type="file" name="avatar" accept="image/*" style="padding: 6px; font-size: 11px; width: 100%;">
+                                    </div>
+                                    <button type="submit" class="btn" style="padding: 8px; font-size: 12px; margin-top: auto; justify-content: center;"><i class="fi fi-rr-disk"></i> Update Identity</button>
+                                </form>
+
+                                <!-- Presence Form -->
+                                <form action="/guild/helper/settings/presence" method="POST" style="display: flex; flex-direction: column; gap: 10px;">
+                                    <input type="hidden" name="guildId" value="<%= guildId %>">
+                                    <input type="hidden" name="id" value="<%= id %>">
+                                    <input type="hidden" name="helperId" value="<%= helper.id %>">
+
+                                    <div style="display: flex; gap: 8px;">
+                                        <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                                            <label style="font-size: 11px;">Status</label>
+                                            <select name="status" style="padding: 8px; font-size: 12px; width: 100%;">
+                                                <option value="online" <%= (helper.presence?.status === 'online') ? 'selected' : '' %>>Online</option>
+                                                <option value="dnd" <%= (helper.presence?.status === 'dnd') ? 'selected' : '' %>>DND</option>
+                                                <option value="idle" <%= (helper.presence?.status === 'idle') ? 'selected' : '' %>>Idle</option>
+                                                <option value="invisible" <%= (helper.presence?.status === 'invisible') ? 'selected' : '' %>>Invisible</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                                            <label style="font-size: 11px;">Activity</label>
+                                            <select name="type" style="padding: 8px; font-size: 12px; width: 100%;">
+                                                <option value="playing" <%= (helper.presence?.type === 'playing') ? 'selected' : '' %>>Playing</option>
+                                                <option value="streaming" <%= (helper.presence?.type === 'streaming') ? 'selected' : '' %>>Streaming</option>
+                                                <option value="listening" <%= (helper.presence?.type === 'listening') ? 'selected' : '' %>>Listening</option>
+                                                <option value="watching" <%= (helper.presence?.type === 'watching') ? 'selected' : '' %>>Watching</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-group" style="margin-bottom: 0;">
+                                        <label style="font-size: 11px;">Activity Text</label>
+                                        <input type="text" name="text" value="<%= helper.presence?.text || '' %>" placeholder="e.g. Broadcast helper..." style="padding: 8px; font-size: 12px; width: 100%;">
+                                    </div>
+
+                                    <button type="submit" class="btn" style="padding: 8px; font-size: 12px; margin-top: auto; justify-content: center;"><i class="fi fi-rr-refresh"></i> Update Presence</button>
+                                </form>
+                            </div>
+                        </div>
+                    <% }) %>
+                </div>
+            <% } %>
+        </div>
+    </div>
+
+    <!-- Share Access Modal -->
+    <div id="inviteModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; justify-content:center; align-items:center;">
+        <div class="card" style="width: 500px; max-height: 85vh; overflow-y: auto; background: var(--bg-card); position:relative; box-shadow: 0 10px 40px rgba(0,0,0,0.5);">
+            <button type="button" onclick="document.getElementById('inviteModal').style.display='none'" style="position:absolute; right:20px; top:20px; background:transparent; border:none; color:white; cursor:pointer; font-size:20px;"><i class="fi fi-rr-cross"></i></button>
+            <h2><i class="fi fi-rr-share"></i> Create Invite Link</h2>
+            <p style="font-size: 13px; color: #e0e0e0; margin-bottom: 20px;">Generate a password-protected link to share access to this specific server's dashboard. Guests cannot access the main control panel.</p>
+            
+            <form id="inviteForm">
+                <input type="hidden" name="guildId" value="<%= guildId %>">
+                <input type="hidden" name="id" value="<%= id %>">
+                
+                <div class="form-group">
+                    <label>Custom Invite Code (Optional)</label>
+                    <input type="text" name="code" placeholder="e.g. my-secret-server">
+                    <small style="color: var(--text-muted); font-size: 11px;">Leave blank for a random link.</small>
+                </div>
+                
+                <div class="form-group">
+                    <label>Access Password</label>
+                    <input type="text" name="password" required placeholder="Create a strong password...">
+                </div>
+                
+                <button type="submit" class="btn" style="width: 100%; margin-top: 10px;"><i class="fi fi-rr-link-alt"></i> Generate Link</button>
+            </form>
+
+            <div id="inviteResult" style="display: none; margin-top: 20px; padding: 15px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px;">
+                <label>Your Invite Link:</label>
+                <div style="display: flex; gap: 10px; margin-top: 8px;">
+                    <input type="text" id="inviteLinkText" readonly style="flex: 1; padding: 8px; font-size: 13px; border-radius: 5px; border: 1px solid var(--accent); background: #000; color: var(--accent);">
+                    <button class="btn" type="button" onclick="navigator.clipboard.writeText(document.getElementById('inviteLinkText').value); this.innerHTML='<i class=\'fi fi-rr-check\'></i> Copied!';" style="padding: 8px 12px;"><i class="fi fi-rr-copy"></i> Copy</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const socket = io();
+        const logPanel = document.getElementById('log-panel');
+        const form = document.getElementById('broadcastForm');
+        const progressSection = document.getElementById('progressSection');
+        const bar = document.getElementById('bar');
+        const progressText = document.getElementById('progress-text');
+        const successText = document.getElementById('success-count');
+        const failedText = document.getElementById('failed-count');
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+
+        // Invite Form Logic
+        document.getElementById('inviteForm')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+            
+            const res = await fetch('/invite/create', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            const result = await res.json();
+            
+            if (result.success) {
+                const inviteResult = document.getElementById('inviteResult');
+                const linkText = document.getElementById('inviteLinkText');
+                inviteResult.style.display = 'block';
+                linkText.value = window.location.origin + '/invite/' + result.inviteCode;
+            } else {
+                alert('Failed to generate invite.');
+            }
+        });
+
+        socket.on('log', (data) => {
+            const div = document.createElement('div');
+            div.style.color = data.type === 'error' ? 'var(--danger)' : (data.type === 'success' ? 'var(--success)' : '#ffffff');
+            div.innerHTML = `<i class="fi fi-rr-angle-right" style="font-size: 10px;"></i> [${new Date().toLocaleTimeString()}] ${data.message}`;
+            logPanel.appendChild(div);
+            logPanel.scrollTop = logPanel.scrollHeight;
+        });
+
+        socket.on('progress', (data) => {
+            const percent = (data.current / data.total) * 100;
+            bar.style.width = percent + '%';
+            progressText.textContent = `${data.current}/${data.total}`;
+            successText.textContent = data.success;
+            failedText.textContent = data.failed;
+        });
+
+        socket.on('finished', () => {
+            startBtn.disabled = false;
+            stopBtn.style.display = 'none';
+        });
+
+        // Blacklist Logic
+        const memberList = <%- JSON.stringify(memberList || []) %>;
+        const blacklist = new Set(<%- JSON.stringify(blacklist || []) %>);
+        const memberContainer = document.getElementById('memberListContainer');
+        const searchInput = document.getElementById('blacklistSearch');
+
+        function renderMembers(filter = '') {
+            memberContainer.innerHTML = '';
+            const lowerFilter = filter.toLowerCase();
+            const filtered = memberList.filter(m => m.id.includes(lowerFilter) || m.displayName.toLowerCase().includes(lowerFilter)).slice(0, 50); // Show max 50 for perf
+            
+            if (filtered.length === 0) {
+                memberContainer.innerHTML = '<div style="color:var(--text-muted); font-size:13px; text-align:center; margin-top:20px;">No members found.</div>';
+                return;
+            }
+
+            filtered.forEach(m => {
+                const isBl = blacklist.has(m.id);
+                const el = document.createElement('div');
+                el.style = `background: linear-gradient(145deg, rgba(255,255,255,0.02) 0%, rgba(0,0,0,0.2) 100%); padding: 12px 16px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid ${isBl ? 'rgba(237, 66, 69, 0.2)' : 'rgba(255,255,255,0.03)'}; transition: all 0.2s ease;`;
+                el.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div style="position: relative;">
+                            <img src="${m.avatar}" style="width: 36px; height: 36px; border-radius: 50%; border: 2px solid ${isBl ? '#ed4245' : 'rgba(255,255,255,0.1)'}; transition: all 0.2s ease;">
+                            ${isBl ? '<div style="position: absolute; bottom: -4px; right: -4px; background: #ed4245; border-radius: 50%; width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; border: 2px solid #0f0f13;"><i class="fi fi-rr-ban" style="font-size: 8px; color: white;"></i></div>' : ''}
+                        </div>
+                        <div>
+                            <div style="font-weight: bold; color: ${isBl ? '#ed4245' : 'white'}; font-size: 14px; transition: color 0.2s ease;">${m.displayName}</div>
+                            <div style="font-size: 11px; color: #a1a1aa; font-family: monospace;">ID: ${m.id}</div>
+                        </div>
+                    </div>
+                    <button type="button" class="btn" style="padding: 6px 12px; font-size: 12px; background: ${isBl ? 'rgba(87, 242, 135, 0.1)' : 'rgba(237, 66, 69, 0.1)'}; color: ${isBl ? '#57f287' : '#ed4245'}; border: 1px solid ${isBl ? 'rgba(87, 242, 135, 0.3)' : 'rgba(237, 66, 69, 0.3)'}; transition: all 0.3s ease;" onmouseover="this.style.background='${isBl ? '#57f287' : '#ed4245'}'; this.style.color='${isBl ? '#000' : 'white'}'" onmouseout="this.style.background='${isBl ? 'rgba(87, 242, 135, 0.1)' : 'rgba(237, 66, 69, 0.1)'}'; this.style.color='${isBl ? '#57f287' : '#ed4245'}'" onclick="toggleBlacklist('${m.id}')">
+                        <i class="fi ${isBl ? 'fi-rr-check' : 'fi-rr-ban'}"></i> ${isBl ? 'Unblock' : 'Block'}
+                    </button>
+                `;
+                memberContainer.appendChild(el);
+            });
+        }
+
+        async function toggleBlacklist(userId) {
+            const res = await fetch('/guild/blacklist/toggle', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ guildId: '<%= guildId %>', userId })
+            });
+            const data = await res.json();
+            if (data.success) {
+                if (data.isBlacklisted) blacklist.add(userId);
+                else blacklist.delete(userId);
+                renderMembers(searchInput.value);
+            }
+        }
+
+        searchInput.addEventListener('input', (e) => renderMembers(e.target.value));
+        renderMembers();
+
+        form.onsubmit = async (e) => {
+            e.preventDefault();
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+            // Since checkboxes don't submit if unchecked, set includeMain value manually
+            data.includeMain = form.querySelector('[name="includeMain"]').checked;
+            
+            startBtn.disabled = true;
+            stopBtn.style.display = 'inline-block';
+            progressSection.style.display = 'block';
+            logPanel.innerHTML = ''; 
+
+            const response = await fetch('/broadcast', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+            if (!result.success) {
+                alert('Error: ' + result.error);
+                startBtn.disabled = false;
+                stopBtn.style.display = 'none';
+            }
+        };
+
+        stopBtn.onclick = async () => {
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+            
+            await fetch('/broadcast/stop', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: data.id, guildId: data.guildId })
+            });
+            
+            stopBtn.style.display = 'none';
+        };
+    </script>
+</body>
+</html>

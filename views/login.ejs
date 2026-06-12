@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Master Login - Broadcast Dashboard</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/2.1.0/uicons-regular-rounded/css/uicons-regular-rounded.css'>
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+            background-color: #0f0f13;
+        }
+        .login-card {
+            width: 100%;
+            max-width: 400px;
+            padding: 40px;
+            text-align: center;
+            background: rgba(20, 20, 25, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="server-bg-overlay" style="background-image: url('/models/Background.jpg'); opacity: 0.5; filter: blur(15px) brightness(0.3);"></div>
+
+    <div class="card login-card">
+        <div style="font-size: 50px; color: var(--accent); margin-bottom: 20px;">
+            <i class="fi fi-rr-shield-check"></i>
+        </div>
+        <h2 style="margin-top: 0; color: white;">Master Access</h2>
+        <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 30px;">Enter the master password to access the control center.</p>
+        
+        <% if (typeof error !== 'undefined' && error) { %>
+            <div style="background: rgba(255, 60, 60, 0.2); border: 1px solid var(--danger); color: var(--danger); padding: 10px; border-radius: 8px; margin-bottom: 20px; font-size: 14px;">
+                <%= error %>
+            </div>
+        <% } %>
+
+        <form action="/login" method="POST">
+            <div class="form-group" style="text-align: left;">
+                <label style="color: #ccc;">Master Password</label>
+                <input type="password" name="password" required placeholder="Enter master password..." autofocus style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: white;">
+            </div>
+            <button type="submit" class="btn" style="width: 100%; padding: 12px; font-size: 16px;"><i class="fi fi-rr-key"></i> Login</button>
+        </form>
+    </div>
+</body>
+</html>
