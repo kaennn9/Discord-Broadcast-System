@@ -1,8 +1,8 @@
 <p align="center">
 
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://github.com/kaennn9/embedskaen/blob/main/assets/banner-dark.png?raw=true">
-    <img alt="Discord Broadcast System Banner" src="https://github.com/kaennn9/embedskaen/blob/main/assets/banner-light.png?raw=true" width="100%">
+    <source media="(prefers-color-scheme: dark)" srcset="public/models/Banner.webp">
+    <img alt="نظام البث الشامل لديسكورد" src="public/models/Banner.webp" width="100%">
   </picture>
 </p>
 
@@ -18,38 +18,31 @@
   </a>
 </p>
 
-<h1 align="center">
-  <img src="https://img.icons8.com/fluency/48/broadcasting.png" alt="broadcast" width="38"/>
-  نظام البث الشامل لديسكورد
-</h1>
+<h1 align="center">نظام البث الشامل لديسكورد</h1>
 
 <p align="center">
-  <strong>نظام Full-Stack احترافي لإدارة وتشغيل عدة بوتات ديسكورد مع توزيع حمل البث الخاص (DMs) بذكاء وسرعة فائقة</strong>
+  <strong>نظام Full-Stack احترافي لإدارة وتشغيل عدة بوتات ديسكورد مع توزيع ذكي لحمل الرسائل الخاصة (DMs)</strong>
 </p>
 
 <p align="center">
-  <img src="https://img.icons8.com/fluency/48/node-js.png" alt="Node.js" width="38"/>
-  <strong>Node.js + Express + Socket.io</strong> • 
-  <img src="https://img.icons8.com/fluency/48/discord.png" alt="Discord" width="38"/>
-  <strong>discord.js</strong> • 
-  <img src="https://img.icons8.com/fluency/48/database.png" alt="Database" width="38"/>
-  <strong>Local JSON DB</strong>
+  <img src="https://img.icons8.com/fluency/48/node-js.png" width="38" alt="Node.js"/> 
+  <strong>Node.js • Express • Socket.io</strong> • 
+  <img src="https://img.icons8.com/fluency/48/discord.png" width="38" alt="Discord"/> 
+  <strong>discord.js</strong>
 </p>
 
 ---
 
 ## ✨ المميزات الرئيسية
 
-| الميزة                        | الوصف                                              |
-|-------------------------------|---------------------------------------------------|
-| **بوتات متعددة**             | تشغيل بوت أساسي + بوتات مساعدة (Helpers)        |
-| **توزيع ذكي للحمل**          | Smart / Random / Both Systems                     |
-| **حماية من Rate Limits**     | تأخير ذكي + توزيع متوازي                           |
-| **لوحة تحكم مظلمة**          | تصميم Discord-like + Glassmorphism                |
-| **دخول آمن**                  | Owner + Guest Access مع Device Fingerprint Lock   |
-| **كونسول ذكي**               | تحديث كل 6 ثوانٍ + شريط تقدم + ETA               |
-| **مراقبة الأخطاء**           | BotFailureL مع إشعارات Webhook ونسخ احتياطية     |
-| **دعم RTL**                   | واجهة عربية كاملة                                |
+- **تشغيل متعدد البوتات**: بوت أساسي + بوتات مساعدة (Helper Bots)
+- **توزيع حمل ذكي**: 3 أنماط (Smart • Random • Both)
+- **حماية من Rate Limits** والباند
+- **لوحة تحكم مظلمة** بتصميم Discord-like + Glassmorphism
+- **نظام أمان قوي**: Owner + Guest Access مع **Device Fingerprint Lock**
+- **كونسول ذكي** مع شريط تقدم وتقدير وقت ذكي (ETA)
+- **مراقبة أخطاء متقدمة** (BotFailureL) مع Webhook ونسخ احتياطية
+- **دعم كامل للغة العربية** (RTL)
 
 ---
 
@@ -57,13 +50,11 @@
 
 ```text
 ejs/
-├── data/
-│   └── db.db                     # قاعدة البيانات المحلية (JSON)
+├── data/db.db
 ├── public/
-│   ├── css/
-│   │   └── style.css
-│   ├── models/                   # الصور والبنرات
-│   └── uploads/                  # رفع الصور المؤقت
+│   ├── css/style.css
+│   ├── models/Banner.webp
+│   └── models/views.png
 ├── src/
 │   ├── BotFailureL.js
 │   ├── botManager.js
@@ -73,36 +64,42 @@ ejs/
 │   └── utils.js
 ├── views/
 │   ├── index.ejs
-│   ├── invite.ejs
+│   ├── server.ejs
 │   ├── login.ejs
-│   └── server.ejs
+│   └── invite.ejs
 ├── .env
-├── main.py                       # ربط Spotify (اختياري)
 ├── package.json
 └── README.md
 ```
 
 ---
 
-## 🛠️ شرح الملفات البرمجية
+## 🛠️ نظرة تقنية على الملفات
 
 ### `src/index.js`
-نقطة بداية التطبيق. يقوم بتهيئة Express + Socket.io + EJS وتشغيل البوتات تلقائياً عند إعادة تشغيل السيرفر.
-
-### `src/db.js`
-قاعدة بيانات محلية بسيطة وقوية تعتمد على JSON.
+تهيئة Express + Socket.io + Auto-start للبوتات عند تشغيل السيرفر.
 
 ### `src/botManager.js`
-مدير البوتات: تشغيل، إيقاف، تحديث الـ Avatar والـ Presence.
+إدارة كاملة للبوتات (تشغيل/إيقاف/Avatar/Presence).
 
 ### `src/utils.js`
-دوال مساعدة + **SmartTimeEstimator** + **SmartConsoleLogger**.
+- `SmartTimeEstimator` (تقدير الوقت الذكي)
+- `SmartConsoleLogger` (تحديث ذكي كل 6 ثوانٍ)
 
 ### `src/BotFailureL.js`
 نظام مراقبة الأخطاء الحرجة مع تسجيل، نسخ احتياطية، وإشعارات.
 
 ### `src/routes.js`
-جميع الـ APIs والمسارات مع نظام حماية Owner/Guest.
+جميع الـ APIs مع حماية Owner/Guest + Blacklist + Invite System.
+
+### `views/server.ejs`
+أقوى لوحة تحكم تحتوي على:
+- Chart.js إحصائيات
+- نموذج البث
+- إدارة Helper Bots
+- كونسول حي
+- Blacklist
+- نظام دعوات الضيوف
 
 ---
 
@@ -110,75 +107,57 @@ ejs/
 
 ```mermaid
 graph TD
-    A[بدء البث] --> B[تصفية الأعضاء + Blacklist]
-    B --> C[تحديد البوتات النشطة]
+    A[بدء البث] --> B[تصفية + Blacklist]
+    B --> C[تحديد البوتات]
     C --> D{نمط التوزيع}
-    D -->|Smart| E[تقسيم متتالي]
-    D -->|Random| F[توزيع عشوائي]
-    D -->|Both| G[Shuffle + تقسيم]
-    E --> H[Workers متوازية]
-    F --> H
-    G --> H
-    H --> I[تأخير + Socket.io Logs]
+    D --> E[Smart / Random / Both]
+    E --> F[Workers متوازية]
+    F --> G[تأخير + Socket.io]
 ```
 
 ---
 
-## 🔒 الأمان والضيوف
-
-- **Owner Access**: كلمة مرور رئيسية.
-- **Guest Access**: روابط دعوة مؤقتة (24 ساعة) مقفلة بـ **Device Fingerprint**.
-- **Blacklist** محلية لكل سيرفر.
-
----
-
-## 🚀 التثبيت
-
-### المتطلبات
-- Node.js v18+
-- حساب Discord Developer
-
-### خطوات التشغيل
+## 🚀 التثبيت والتشغيل
 
 ```bash
-# 1. استنساخ المشروع
 git clone https://github.com/YOUR_USERNAME/discord-broadcast-system.git
 cd discord-broadcast-system
 
-# 2. تثبيت الاعتماديات
 npm install
 
-# 3. إعداد .env
+# إعداد الملفات البيئية
 cp .env.example .env
 ```
 
-**مثال على `.env`**:
+**`.env` مثال:**
 ```env
 PORT=3000
 MASTER_PASSWORD=admin123admin123
-# WEBHOOK_URL= (اختياري)
+# WEBHOOK_URL=your_webhook_here
 ```
 
 ```bash
-# تشغيل في وضع التطوير
+# تشغيل التطوير
 npm run dev
 
 # تشغيل الإنتاج
 npm start
 ```
 
-افتح المتصفح على `http://localhost:3000`
+ثم افتح: `http://localhost:3000`
 
 ---
 
-## 📸 صور توضيحية
+## 📸 لقطات الشاشة
 
-*(أضف صور شاشة حقيقية هنا بعد رفعها)*
+![لوحة التحكم](public/models/views.png)
+
+*(أضف المزيد من الصور هنا بعد رفعها)*
 
 ---
 
 <p align="center">
-  <a href="https://github.com/YOUR_USERNAME/discord-broadcast-system">
+  <a href="https://github.com/kaennn9/discord-broadcast-system">
     <img src="https://img.icons8.com/ios-filled/50/FFD700/star.png" alt="Star"/>
     <strong>إذا أعجبك المشروع، لا تنسَ تعطيه ⭐</strong>
     <img src="https://img.icons8.com/ios-filled/50/FFD700/star.png" alt="Star"/>
@@ -186,12 +165,10 @@ npm start
 </p>
 
 <p align="center">
-  <strong>صنع بحب لمجتمع ديسكورد العربي</strong><br>
-  <img src="https://img.icons8.com/fluency/48/sparkling.png" alt="sparkles"/>
+  <strong>صنع بحب لمجتمع ديسكورد العربي</strong>
 </p>
-
----
 
 **License**: MIT © [YOUR NAME](https://github.com/kaennn9)
 ```
-هل تريد تعديل أي قسم إضافي أو إضافة ميزات جديدة؟
+
+---"Known Issues" أو أي تعديل آخر؟
