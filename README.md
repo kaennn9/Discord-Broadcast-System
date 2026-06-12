@@ -10,7 +10,7 @@
   <a href="https://discord.com/users/1188494987520909422">
     <img src="https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white" alt="Discord"/>
   </a>
-  <a href="https://github.com/kaennn9">
+  <a href="https://github.com/YOUR_USERNAME/discord-broadcast-system">
     <img src="https://img.shields.io/badge/GitHub-171515?style=for-the-badge&logo=github&logoColor=white" alt="GitHub"/>
   </a>
   <a href="https://github.com/YOUR_USERNAME/discord-broadcast-system/stargazers">
@@ -21,28 +21,35 @@
 <h1 align="center">نظام البث الشامل لديسكورد</h1>
 
 <p align="center">
-  <strong>نظام Full-Stack احترافي لإدارة وتشغيل عدة بوتات ديسكورد مع توزيع ذكي لحمل الرسائل الخاصة (DMs)</strong>
+  <strong>نظام Full-Stack احترافي متطور لإدارة وتشغيل عدة بوتات ديسكورد مع توزيع ذكي ومتوازي لحمل الرسائل الخاصة (DMs)</strong>
 </p>
 
 <p align="center">
   <img src="https://img.icons8.com/fluency/48/node-js.png" width="38" alt="Node.js"/> 
   <strong>Node.js • Express • Socket.io</strong> • 
   <img src="https://img.icons8.com/fluency/48/discord.png" width="38" alt="Discord"/> 
-  <strong>discord.js</strong>
+  <strong>discord.js</strong> • 
+  <strong>EJS + Chart.js</strong>
 </p>
 
 ---
 
 ## ✨ المميزات الرئيسية
 
-- **تشغيل متعدد البوتات**: بوت أساسي + بوتات مساعدة (Helper Bots)
-- **توزيع حمل ذكي**: 3 أنماط (Smart • Random • Both)
-- **حماية من Rate Limits** والباند
-- **لوحة تحكم مظلمة** بتصميم Discord-like + Glassmorphism
-- **نظام أمان قوي**: Owner + Guest Access مع **Device Fingerprint Lock**
-- **كونسول ذكي** مع شريط تقدم وتقدير وقت ذكي (ETA)
-- **مراقبة أخطاء متقدمة** (BotFailureL) مع Webhook ونسخ احتياطية
-- **دعم كامل للغة العربية** (RTL)
+- **تشغيل متعدد البوتات** — بوت رئيسي + عدد غير محدود من البوتات المساعدة (Helper Bots)
+- **3 أنماط توزيع ذكية** — Smart • Random • Both (الأفضل لتجنب الكشف)
+- **حماية متقدمة من Rate Limits** والباند
+- **لوحة تحكم مظلمة فاخرة** بتصميم مستوحى من Discord + Glassmorphism + تأثيرات متحركة
+- **نظام أمان قوي** — Owner Access + Guest Access مع **Device Fingerprint Lock**
+- **كونسول حي ذكي** — تحديث تلقائي + شريط تقدم + تقدير وقت ذكي (ETA)
+- **مراقبة أخطاء متقدمة** (BotFailureL) — تسجيل + نسخ احتياطية + Webhook Notifications
+- **دعم كامل للغة العربية** (RTL) + تصميم متجاوب
+- **تأثيرات متحركة** — أزرار Hover، Modals سلسة، Progress Bar متحرك، Sidebar متحرك، Glass Effects
+- **Chart.js إحصائيات حية** — رسوم بيانية متحركة للأعضاء والحالة
+- **Blacklist محلية** لكل سيرفر
+- **نظام دعوات ضيوف آمن** (24 ساعة + قفل بصمة الجهاز)
+- **Auto-Start** للبوتات عند إعادة تشغيل السيرفر
+- **تحديث Avatar & Presence** مباشرة من اللوحة
 
 ---
 
@@ -53,8 +60,10 @@ ejs/
 ├── data/db.db
 ├── public/
 │   ├── css/style.css
-│   ├── models/Banner.webp
-│   └── models/views.png
+│   └── models/
+│       ├── Banner.webp
+│       ├── views.png
+│       └── views2.png
 ├── src/
 │   ├── BotFailureL.js
 │   ├── botManager.js
@@ -77,29 +86,29 @@ ejs/
 ## 🛠️ نظرة تقنية على الملفات
 
 ### `src/index.js`
-تهيئة Express + Socket.io + Auto-start للبوتات عند تشغيل السيرفر.
+تهيئة الخادم + Socket.io + Auto-start للبوتات.
 
 ### `src/botManager.js`
-إدارة كاملة للبوتات (تشغيل/إيقاف/Avatar/Presence).
+إدارة كاملة لدورة حياة البوتات (Start / Stop / Avatar / Presence).
 
 ### `src/utils.js`
-- `SmartTimeEstimator` (تقدير الوقت الذكي)
-- `SmartConsoleLogger` (تحديث ذكي كل 6 ثوانٍ)
+- `SmartTimeEstimator` — تقدير وقت ذكي
+- `SmartConsoleLogger` — كونسول ذكي (تحديث كل 6 ثوانٍ)
 
 ### `src/BotFailureL.js`
-نظام مراقبة الأخطاء الحرجة مع تسجيل، نسخ احتياطية، وإشعارات.
+نظام مراقبة الأخطاء الحرجة مع إشعارات ونسخ احتياطية.
 
 ### `src/routes.js`
-جميع الـ APIs مع حماية Owner/Guest + Blacklist + Invite System.
+جميع APIs + حماية + Blacklist + Invite System + Cache.
 
 ### `views/server.ejs`
-أقوى لوحة تحكم تحتوي على:
-- Chart.js إحصائيات
-- نموذج البث
-- إدارة Helper Bots
-- كونسول حي
-- Blacklist
-- نظام دعوات الضيوف
+لوحة التحكم المتكاملة:
+- إحصائيات Chart.js متحركة
+- نموذج البث المتقدم
+- إدارة Helper Bots (Modals)
+- كونسول حي ملون
+- Blacklist Panel
+- Share Access Modal
 
 ---
 
@@ -107,12 +116,13 @@ ejs/
 
 ```mermaid
 graph TD
-    A[بدء البث] --> B[تصفية + Blacklist]
-    B --> C[تحديد البوتات]
+    A[بدء البث] --> B[تصفية الأعضاء + Blacklist]
+    B --> C[تحديد البوتات النشطة]
     C --> D{نمط التوزيع}
     D --> E[Smart / Random / Both]
     E --> F[Workers متوازية]
-    F --> G[تأخير + Socket.io]
+    F --> G[تأخير ذكي + Socket.io Logs]
+    G --> H[Progress + ETA + Live Console]
 ```
 
 ---
@@ -125,39 +135,41 @@ cd discord-broadcast-system
 
 npm install
 
-# إعداد الملفات البيئية
+# إنشاء ملف البيئة
 cp .env.example .env
 ```
 
-**`.env` مثال:**
+**مثال `.env`**:
 ```env
 PORT=3000
 MASTER_PASSWORD=admin123admin123
-# WEBHOOK_URL=your_webhook_here
+# WEBHOOK_URL=https://discord.com/api/webhooks/...
 ```
 
 ```bash
-# تشغيل التطوير
+# تطوير (مع إعادة تحميل تلقائي)
 npm run dev
 
-# تشغيل الإنتاج
+# إنتاج
 npm start
 ```
 
-ثم افتح: `http://localhost:3000`
+افتح المتصفح على: `http://localhost:3000`
 
 ---
 
 ## 📸 لقطات الشاشة
 
-![لوحة التحكم](public/models/views.png)
+![لوحة التحكم الرئيسية](public/models/views.png)
 
-*(أضف المزيد من الصور هنا بعد رفعها)*
+![لوحة تحكم السيرفر - البث والكونسول](public/models/views2.png)
+
+*(أضف المزيد من الصور بعد رفعها على GitHub)*
 
 ---
 
 <p align="center">
-  <a href="https://github.com/kaennn9/discord-broadcast-system">
+  <a href="https://github.com/YOUR_USERNAME/discord-broadcast-system">
     <img src="https://img.icons8.com/ios-filled/50/FFD700/star.png" alt="Star"/>
     <strong>إذا أعجبك المشروع، لا تنسَ تعطيه ⭐</strong>
     <img src="https://img.icons8.com/ios-filled/50/FFD700/star.png" alt="Star"/>
@@ -165,10 +177,10 @@ npm start
 </p>
 
 <p align="center">
-  <strong>صنع بحب لمجتمع ديسكورد العربي</strong>
+  <strong>صنع بحب لمجتمع ديسكورد العربي</strong><br>
+  <img src="https://img.icons8.com/fluency/48/sparkling.png" alt="sparkles"/>
 </p>
 
-**License**: MIT © [YOUR NAME](https://github.com/kaennn9)
-```
+**License**: MIT © [YOUR NAME](https://github.com/YOUR_USERNAME)
 
----"Known Issues" أو أي تعديل آخر؟
+---
